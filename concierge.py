@@ -17,6 +17,7 @@ def initialize_concierge(request_data):
     tasks_dict = {}
     agents = []
     tasks = []
+    temp_tasks_with_context = []
 
     for agent_info in request_data["agents"]:
         agent = Agent(
@@ -28,32 +29,32 @@ def initialize_concierge(request_data):
             max_iter=agent_info.get("max_iter", 10)
         )
         if "tools" in agent_info:
-            agent_tools = [tool_mapping[tool] for tool in agent_info["tools"]]
-            agent.tools = agent_tools
+            agent.tools = [tool_mapping[tool] for tool in agent_info["tools"]]
 
-        agent_tasks = []
         for task_info in agent_info.get("tasks", []):
-            context_tasks = [tasks_dict[ct] for ct in task_info.get("context", []) if ct in tasks_dict]
             task = Task(
                 description=task_info["description"],
                 agent=agent,
                 async_execution=task_info.get("async_execution", False),
-                context=context_tasks,
+                context=[],  # Context to be set later
                 expected_output=task_info.get("expected_output", "")
+                
             )
-            if 'callback_function' in task_info and task_info['callback_function'] in callback_mapping:
-                task.callback = callback_mapping[task_info['callback_function']]
+            if 'callback' in task_info:
+                task.callback = callback_mapping.get(task_info['callback'])
+            tasks_dict[task_info["id"]] = task
+            temp_tasks_with_context.append((task, task_info.get("context", [])))
 
-            agent_tasks.append(task)
-            tasks_dict[task_info["id"]] = task  # Assuming each task has a unique ID
-
-        tasks.extend(agent_tasks)
         agents.append(agent)
 
+    # Now, update each task's context based on IDs after all tasks have been created
+    for task, context_ids in temp_tasks_with_context:
+        task.context = [tasks_dict[ct_id] for ct_id in context_ids if ct_id in tasks_dict]
+        tasks.append(task)  # Now append the correctly contextualized task to the tasks list
+
     # Prepare manager LLM
-    manager_llm_params = request_data.get('manager_llm', {})
     manager_llm = ChatOpenAI(
-        model=manager_llm_params.get('model', 'gpt-3')
+        model=request_data['manager_llm'].get('model', 'gpt-3')
     )
 
     return Crew(

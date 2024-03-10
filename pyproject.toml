@@ -1,8 +1,11 @@
 [tool.poetry]
-name = "ai-news-letter"
+name = "concierge"
 version = "0.1.0"
 description = "AI News Letter"
 authors = ["Joao Moura, Brandon Hancock"]
+packages = [
+    { include = "concierge", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.10.0,<4.0.0"

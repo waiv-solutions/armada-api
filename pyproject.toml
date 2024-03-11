@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "concierge"
+name = "armada-api"
 version = "0.1.0"
-description = "AI News Letter"
+description = "AI Concierge"
 authors = ["Joao Moura, Brandon Hancock"]
 packages = [
-    { include = "main", from = "src" },
+    { include = "armada", from = "src" },
 ]
 
 [tool.poetry.dependencies]

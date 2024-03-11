@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from concierge import initialize_concierge, execute_concierge
+from .concierge.concierge import initialize_concierge, execute_concierge
 
 app = Flask(__name__)
 

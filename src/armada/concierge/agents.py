@@ -1,5 +1,5 @@
 from crewai import Agent
-from .. import SearchTools
+from ..tools.search_tools import SearchTools
 
 
 class AINewsLetterAgents():
